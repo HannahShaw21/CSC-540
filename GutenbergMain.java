@@ -47,13 +47,15 @@ public class GutenbergMain {
                             "- QUIT: exits the program\n" +
                             "- LIST: lists all the operations\n" +
                             "- [operationID]: runs the operation associated with the given ID\n");
+
+        // Entering main CLI loop
         while (true) {
             System.out.print("> ");
             String input = scanner.nextLine();
 
+            // basic commands
             if (input.equalsIgnoreCase("quit"))
                 break;
-
             if (input.equalsIgnoreCase("list")) {
 
                 for (int i = 0; i < GutenbergConnection.getNumOperations(); i++) {
@@ -62,8 +64,8 @@ public class GutenbergMain {
                 continue;
             }
 
+            // Try interpreting it as an operation ID.
             try {
-                // Try interpreting it as an operation ID.
                 int opID = Integer.parseInt(input);
                 if (opID < 0 || opID >= GutenbergConnection.getNumOperations()) {
                     System.out.println("Found no operation with ID " + opID + ".\n" +
@@ -86,6 +88,7 @@ public class GutenbergMain {
                     if (p.getType() == String.class) {
                         castParameters[paramID] = paramInput;
                     } else if (p.getType() == int.class) {
+                        // Wrap the parsing in a loop to ensure they input the correct type
                         boolean askAgain;
                         do {
                             askAgain = false;
@@ -98,6 +101,7 @@ public class GutenbergMain {
                             }
                         } while (askAgain);
                     } else if (p.getType() == float.class) {
+                        // Wrap the parsing in a loop to ensure they input the correct type
                         boolean askAgain;
                         do {
                             askAgain = false;
@@ -143,7 +147,6 @@ public class GutenbergMain {
         }
 
         gbConn.close();
-
         System.out.println("Bye!");
     }
 }
