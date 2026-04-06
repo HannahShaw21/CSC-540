@@ -57,7 +57,7 @@ public class GutenbergMain {
             if (input.equalsIgnoreCase("list")) {
 
                 for (int i = 0; i < GutenbergConnection.getNumOperations(); i++) {
-                    System.out.print(i + ": " + GutenbergConnection.getOperationSignature(i));
+                    System.out.println(i + ": " + GutenbergConnection.getOperationSignature(i));
                 }
                 continue;
             }
