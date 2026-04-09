@@ -1,9 +1,11 @@
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.sql.Connection;
+
 import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.SQLException;
+import java.time.LocalDate;
 
 /**
  * A class representing a connection to the Gutenberg Press database.
@@ -101,9 +103,27 @@ public class GutenbergConnection {
         con.close();
     }
 
-    public void InsertNewPublication(String title, int pubID) {
-        System.out.println(title + " (" + pubID + ")");
-    }
+    ////////////////////////////////////
+    /// TASK 1: Editing & Publishing ///
+    ////////////////////////////////////
 
-    public void DeletePublication() {}
+    public void InsertNewPublication(String title, String topic, String type) {}
+
+    public void DeletePublication(int pubID) {}
+
+    public void UpdatePublication(int pubID, String title, String topic, String periodicity) {}
+
+    public void AssignEditorToPublication(int writerID, int pubID) {}
+
+    public void RemoveEditorFromPublication(int writerID, int pubID) {}
+
+    public void ListPublicationsForEditor(int writerID) {}
+
+    public void AddArticleToIssue(int issueID, int articleNum, String title, LocalDate writtenDate, String content) {}
+
+    public void AddChapterToBookEdition(String isbn, int chapterNum, String title, String content) {}
+
+    public void DeleteArticle(int issueID, int articleNum) {}
+
+    public void DeleteChapter(String isbn, int chapterNum) {}
 }
