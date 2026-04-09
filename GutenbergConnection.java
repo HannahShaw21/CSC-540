@@ -103,11 +103,13 @@ public class GutenbergConnection {
         con.close();
     }
 
-    ////////////////////////////////////
+    /*//////////////////////////////////
     /// TASK 1: Editing & Publishing ///
-    ////////////////////////////////////
+    //////////////////////////////////*/
 
-    public void InsertNewPublication(String title, String topic, String type) {}
+    public int CreateNewPublication(String title, String topic, String type) {
+        return 0; // should return the pubID of newly created publication
+    }
 
     public void DeletePublication(int pubID) {}
 
@@ -119,11 +121,17 @@ public class GutenbergConnection {
 
     public void ListPublicationsForEditor(int writerID) {}
 
-    public void AddArticleToIssue(int issueID, int articleNum, String title, LocalDate writtenDate, String content) {}
+    public void CreateNewArticle(int issueID, int articleNum, String title, LocalDate writtenDate, String content) {}
 
-    public void AddChapterToBookEdition(String isbn, int chapterNum, String title, String content) {}
+    public void CreateNewChapter(String isbn, int chapterNum, String title, String content) {}
 
     public void DeleteArticle(int issueID, int articleNum) {}
 
     public void DeleteChapter(String isbn, int chapterNum) {}
+
+
+    /*////////////////////////
+    /// TASK 2: Production ///
+    ////////////////////// /*/
+
 }
