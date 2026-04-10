@@ -1,4 +1,7 @@
-package operations;
+package operations.publications;
+
+import operations.FailedOperationException;
+import operations.Operation;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,7 +28,7 @@ public class DeletePublication extends Operation {
     @Override
     public void run(Statement stmt) {
         // Build the SQL string based on Tyler's style
-        String sql = "DELETE FROM Publications WHERE pubID = " + pubID + ";";
+        String sql = "DELETE FROM Publications WHERE pubID =" + pubID + ";";
 
         try {
             // executeUpdate returns the number of rows affected

@@ -1,4 +1,7 @@
-package operations;
+package operations.publications;
+
+import operations.FailedOperationException;
+import operations.Operation;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,8 +28,8 @@ public class AssignEditorToPublication extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL command to insert into the junction table
-        String sql = "INSERT INTO PublicationEditedBy (pubID, writerID) VALUES (" 
-                     + pubID + ", " + writerID + ");";
+        String sql = "INSERT INTO Edits (writerID, pubID) VALUES ("
+                     + writerID + ", " + pubID + ");";
 
         try {
             int rowsAffected = stmt.executeUpdate(sql);
