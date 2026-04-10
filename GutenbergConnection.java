@@ -46,7 +46,7 @@ public class GutenbergConnection {
             if (p != parameters[0]) sb.append(", ");
 
             if (p.getType() == Optional.class)  {
-                sb.append("[");
+                sb.append("Optional[");
                 sb.append(Util.getTypeFromOptionalParameter(p).getSimpleName());
                 sb.append(" ").append(p.getName());
                 sb.append("]");
