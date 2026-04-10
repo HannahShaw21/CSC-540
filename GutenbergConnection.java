@@ -28,6 +28,7 @@ public class GutenbergConnection {
     public static final Class[] OPERATIONS = new Class[]{
             UpdatePublication.class
             DeletePublication.class
+            AssignEditorToPublication.class
     };
 
     /**
