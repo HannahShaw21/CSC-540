@@ -75,7 +75,7 @@ public class GutenbergConnection {
      * Initializes all tables used by the database, resetting them if they already existed.
      * @return True if the reset was successful, False if an error occurred
      */
-    public boolean initializeTables() {
+    public boolean rebuildDatabase() {
         try {
             stmt.execute("START TRANSACTION ");
 
