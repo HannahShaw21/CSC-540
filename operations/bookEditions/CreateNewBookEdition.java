@@ -9,68 +9,56 @@ import java.time.LocalDate;
 
 /**
  * Task 2.1: Enter new book edition.
- * This operation records a new physical edition of a book and establishes 
- * its relationship to the parent publication.
- * * <p>Design Decision: This class implements a two-step insertion process to 
- * maintain referential integrity between the BookEditions and EditionOf tables.</p>
+ * Uses a Transaction to ensure that both the BookEditions entry and 
+ * the EditionOf link are created atomically.
  */
 public class CreateNewBookEdition extends Operation {
 
-    /** The unique publication ID from the Publications table. */
     public int pubID;
-    
-    /** The 13-character International Standard Book Number (Primary Key). */
     public String isbn;
-    
-    /** The edition number (e.g., 1 for first edition, 2 for second). */
     public int editionNum;
-    
-    /** The date the manuscript was completed. */
     public LocalDate writtenDate;
-    
-    /** The date the specific edition was published. */
     public LocalDate pubDate;
 
-    /**
-     * Default constructor for reflection-based instantiation.
-     */
     public CreateNewBookEdition() {}
 
-    /**
-     * Executes the insertion of the book edition and its publication link.
-     * * @param stmt The active JDBC Statement used to execute the updates.
-     * @throws FailedOperationException if any of the following occur:
-     * <ul>
-     * <li><b>Primary Key Violation:</b> The ISBN provided already exists in the database.</li>
-     * <li><b>Foreign Key Violation:</b> The provided pubID does not exist in the Publications table.</li>
-     * <li><b>Data Integrity:</b> Dates are malformed or null.</li>
-     * <li><b>Connectivity:</b> The database connection was lost mid-operation.</li>
-     * </ul>
-     */
     @Override
     public void run(Statement stmt) {
         String sqlBook = "INSERT INTO BookEditions (isbn, editionNum, pubDate, writtenDate) VALUES (" +
-                         "\"" + isbn + "\", " +
+                         "'" + isbn + "', " + 
                          editionNum + ", " + 
-                         "\"" + pubDate.toString() + "\", " +
-                         "\"" + writtenDate.toString() + "\");";
+                         "'" + pubDate.toString() + "', " + 
+                         "'" + writtenDate.toString() + "');";
 
         String sqlLink = "INSERT INTO EditionOf (isbn, pubID) VALUES (" +
-                         "\"" + isbn + "\", " + pubID + ");";
+                         "'" + isbn + "', " + pubID + ");";
 
         try {
-            // First, create the book edition record
+            // 1. Start the transaction
+            stmt.executeUpdate("START TRANSACTION;");
+
+            // 2. Run the first part (Create the Book)
             stmt.executeUpdate(sqlBook);
             
-            // Second, link it to the publication
+            // 3. Run the second part (Link to Publication)
             stmt.executeUpdate(sqlLink);
             
-            System.out.println("Success: New Book Edition '" + isbn + "' created and linked to Publication " + pubID + ".");
+            // 4. If we got here, everything worked! Save changes permanently.
+            stmt.executeUpdate("COMMIT;");
+            
+            System.out.println("Success: Book Edition and Publication Link created atomically.");
             
         } catch (SQLException e) {
-            // We wrap the SQLException in FailedOperationException 
-            // to provide a clear error message to the CLI user.
-            throw new FailedOperationException("Failed to create book edition: " + e.getMessage());
+            try {
+                // 5. If ANY step failed, undo everything inside this transaction
+                stmt.executeUpdate("ROLLBACK;");
+            } catch (SQLException rollbackEx) {
+                // This would only happen if the database connection itself died
+                System.err.println("Critical failure: Could not rollback transaction.");
+            }
+            
+            // Throw Tyler's exception so the CLI knows the operation failed
+            throw new FailedOperationException("Transaction failed. No data was changed. Error: " + e.getMessage());
         }
     }
 }
