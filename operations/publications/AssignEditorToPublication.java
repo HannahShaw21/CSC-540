@@ -1,5 +1,6 @@
-package operations;
+package operations.publications;
 
+import operations.*;
 import java.sql.SQLException;
 import java.sql.Statement;
 
