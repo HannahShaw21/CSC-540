@@ -47,6 +47,7 @@ public class GutenbergMain {
             System.out.println("Connected to database! Use the following commands:\n" +
                     "- QUIT: exits the program\n" +
                     "- LIST: lists all the operations\n" +
+                    "- RESET: initializes all tables in the database\n" +
                     "- <operationID>: runs the operation associated with the given ID\n");
 
             // Entering main CLI loop
@@ -78,6 +79,24 @@ public class GutenbergMain {
                 System.out.println(i + ": " + GutenbergConnection.getOperationSignature(i));
             }
             return false;
+        }
+        if (input.equalsIgnoreCase("reset")) {
+            System.out.print("Resetting the database will delete all existing information.\n" +
+                    "Confirm? (y/n) ");
+            String confirmString = in.nextLine();
+            if (!confirmString.equalsIgnoreCase("y")) {
+                System.out.println("Reset cancelled.");
+                return false;
+            }
+
+            System.out.println("Resetting database...");
+            if (gbConn.initializeTables()) {
+                System.out.println("Reset successful!");
+                return false;
+            } else {
+                System.out.println("Reset failed.");
+                return false;
+            }
         }
 
         // Try interpreting it as an operation ID.
