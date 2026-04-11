@@ -6,6 +6,8 @@ import java.sql.SQLException;
 
 import java.util.*;
 import java.io.Console;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GutenbergMain {
 
@@ -168,6 +170,16 @@ public class GutenbergMain {
                     System.out.println("Parameter '" + parameterName + "' must be " +
                             parameterType.getSimpleName() + ".");
                     continue; // ask for a new parameter assignment
+                }
+
+                if (parameterType == String.class) {
+                    // Perform an extra check for strings: sanitize to ensure no funky SQL injections
+                    Pattern sqlSyntaxPattern = Pattern.compile("[;*\"]");
+                    Matcher sqlSyntaxMatcher = sqlSyntaxPattern.matcher(parameterStringedValue);
+                    if (sqlSyntaxMatcher.find()) {
+                        System.out.println("Inputs cannot contain semicolons, asterisks, or double quotes. No SQL Injections for you!");
+                        continue;
+                    }
                 }
 
                 // Assign the value to the parameter
