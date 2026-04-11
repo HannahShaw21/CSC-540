@@ -9,12 +9,14 @@ import java.io.Console;
 
 public class GutenbergMain {
 
+    private static Scanner in;
+    private static GutenbergConnection gbConn;
+
     public static void main(String[] args) throws SQLException {
 
-        Scanner scanner = new Scanner(System.in);
+        in = new Scanner(System.in);
 
         // Connect to the database
-        GutenbergConnection gbConn;
         try {
             Console console = System.console();
 
@@ -23,9 +25,9 @@ public class GutenbergMain {
             String user;
             String pswd;
             if (console == null) {
-                user = scanner.nextLine();
+                user = in.nextLine();
                 System.out.print("Enter your password (WILL BE VISIBLE): ");
-                pswd = scanner.nextLine();
+                pswd = in.nextLine();
             } else {
                 user = console.readLine();
                 System.out.print("Enter your password: ");
@@ -39,171 +41,202 @@ public class GutenbergMain {
             return; // Don't actually need this, but makes the compiler stop complaining about gbConn not being init'd
         }
 
-        // Initialize the database operation list
+        try {
+            System.out.println("Connected to database! Use the following commands:\n" +
+                    "- QUIT: exits the program\n" +
+                    "- LIST: lists all the operations\n" +
+                    "- <operationID>: runs the operation associated with the given ID\n");
 
-        System.out.println("Connected to database! Use the following commands:\n" +
-                            "- QUIT: exits the program\n" +
-                            "- LIST: lists all the operations\n" +
-                            "- <operationID>: runs the operation associated with the given ID\n");
-
-        // Entering main CLI loop
-        while (true) {
-            System.out.print("> ");
-            String input = scanner.nextLine();
-
-            // basic commands
-            if (input.equalsIgnoreCase("quit"))
-                break;
-            if (input.equalsIgnoreCase("list")) {
-                System.out.println("(Square Brackets indicate an optional parameter)");
-                for (int i = 0; i < GutenbergConnection.OPERATIONS.length; i++) {
-                    System.out.println(i + ": " + GutenbergConnection.getOperationSignature(i));
-                }
-                continue;
-            }
-
-            // Try interpreting it as an operation ID.
-            try {
-                int opID = Integer.parseInt(input);
-                if (opID < 0 || opID >= GutenbergConnection.OPERATIONS.length) {
-                    System.out.println("Found no operation with ID " + opID + ".\n" +
-                                        "Use 'LIST' command to see all available operations");
-                    continue;
-                }
-
-                System.out.println("Selected operation " + opID + ": " + GutenbergConnection.getOperationSignature(opID));
-                Class op = GutenbergConnection.OPERATIONS[opID];
-                Constructor opConstructor = op.getConstructors()[0];
-
-                try {
-                    Operation preparedOperation = (Operation) opConstructor.newInstance();
-                    Field[] parameters = op.getFields();
-
-
-                    if (parameters.length > 0) {
-                        HashSet<String> requiredParameters = new HashSet<>();
-                        for (Field p : parameters) {
-                            if (p.getType() != Optional.class)
-                                requiredParameters.add(p.getName());
-                        }
-
-                        boolean failedAssignment = false;
-                        while (true) {
-                            System.out.print("Enter parameter assignment (or leave blank to submit): ");
-                            String assignment = scanner.nextLine();
-
-                            if (assignment.isBlank()) {
-
-                                if (!requiredParameters.isEmpty()) {
-                                    System.out.print("Missing required parameters: ");
-                                    System.out.println(String.join(",", requiredParameters));
-                                    continue;
-                                }
-
-                                break; // Break out of the assignment loop
-                            }
-
-                            int splitIndex = assignment.indexOf("=");
-                            if (splitIndex < 0) {
-                                System.out.println("Parameter assignment '" + assignment + "' missing equals sign.");
-                                failedAssignment = true;
-                                break;
-                            }
-
-                            String parameterName = assignment.substring(0, splitIndex).strip();
-                            Field parameter;
-                            try {
-                                parameter = op.getField(parameterName);
-                            } catch (NoSuchFieldException _) {
-                                System.out.println("No such parameter '" + parameterName + "'.");
-                                failedAssignment = true;
-                                break;
-                            }
-
-                            Class parameterType = parameter.getType();
-                            if (parameterType == Optional.class)
-                                parameterType = Util.getTypeFromOptionalParameter(parameter);
-
-                            String parameterStringedValue = assignment.substring(splitIndex + 1).strip();
-                            Object castParameter;
-
-                            // Cast parameters to the proper type
-                            if (parameterType == String.class) {
-                                castParameter = parameterStringedValue;
-                            } else if (parameterType == int.class) {
-                                try {
-                                    castParameter = Integer.parseInt(parameterStringedValue);
-                                } catch (NumberFormatException _) {
-                                    System.out.print("Parameter '" + parameterName + "' must be an integer.");
-                                    failedAssignment = true;
-                                    break;
-                                }
-                            } else if (parameterType == float.class) {
-                                try {
-                                    castParameter = Integer.parseInt(parameterStringedValue);
-                                } catch (NumberFormatException _) {
-                                    System.out.print("Parameter '" + parameterName + "' must be a float.");
-                                    failedAssignment = true;
-                                    break;
-                                }
-                            } else {
-                                throw new RuntimeException("Operation '" + op.getSimpleName() +
-                                        "' used unparseable parameter type '" + parameterType.getSimpleName() + "'.");
-                            }
-
-                            if (parameter.getType() == Optional.class)
-                                parameter.set(preparedOperation, Optional.of(castParameter));
-                            else parameter.set(preparedOperation, castParameter);
-
-                            requiredParameters.remove(parameterName);
-                        }
-
-                        if (failedAssignment) continue; // return to top of loop
-
-
-                        System.out.print("Final operation: " + op.getSimpleName() + "(");
-                        for (int paramID = 0; paramID < parameters.length; paramID++) {
-                            Field p = parameters[paramID];
-                            Class pType = p.getType();
-                            Object pValue = p.get(preparedOperation);
-                            if (pType == Optional.class) {
-                                if (((Optional) pValue).isEmpty())
-                                    continue;
-                                else {
-                                    pType = Util.getTypeFromOptionalParameter(p);
-                                    pValue = ((Optional) pValue).get();
-                                }
-                            }
-
-                            if (paramID != 0) System.out.print(", ");
-
-                            System.out.print(p.getName() + "=");
-                            if (pType == String.class) {
-                                System.out.print("\"" + pValue + "\"");
-                            } else System.out.print(pValue);
-                        }
-                        System.out.println(")");
-                    }
-
-                    System.out.print("Confirm? (y/n) ");
-                    String confirmString = scanner.nextLine();
-                    if (!confirmString.equalsIgnoreCase("y"))
-                        continue; // They don't want this operation. back to top of loop.
-
-                    // Call method with the proper parameters
-                    try {
-                        gbConn.execute(preparedOperation);
-                    } catch (FailedOperationException e) {
-                        System.out.println("OPERATION FAILED! " + e.getMessage());
-                    }
-                } catch (IllegalAccessException | InvocationTargetException | InstantiationException _) {}
-
-            } catch (NumberFormatException _) {
-                System.out.println("'" + input + "' is not a valid command.");
-            }
+            // Entering main CLI loop
+            while (true)
+                if (readConsoleCommand()) break;
+        } finally {
+            System.out.println("Closing database connection...");
+            gbConn.close();
+            System.out.println("Connection closed!");
         }
 
-        gbConn.close();
         System.out.println("Bye!");
+    }
+
+    /**
+     * Reads and processes a console command from the user.
+     * @return True if the program should end, False otherwise
+     */
+    private static boolean readConsoleCommand() {
+        System.out.print("> ");
+        String input = in.nextLine();
+
+        // basic commands
+        if (input.equalsIgnoreCase("quit"))
+            return true;
+        if (input.equalsIgnoreCase("list")) {
+            System.out.println("(Square Brackets indicate an optional parameter)");
+            for (int i = 0; i < GutenbergConnection.OPERATIONS.length; i++) {
+                System.out.println(i + ": " + GutenbergConnection.getOperationSignature(i));
+            }
+            return false;
+        }
+
+        // Try interpreting it as an operation ID.
+        int opID;
+        try {
+            opID = Integer.parseInt(input);
+            if (opID < 0 || opID >= GutenbergConnection.OPERATIONS.length) {
+                // Input was not a valid operation ID
+                System.out.println("Found no operation with ID " + opID + ".\n" +
+                        "Use 'LIST' command to see all available operations");
+                return false;
+            }
+
+        } catch (NumberFormatException _) {
+            // Input was not a number, and wasn't a predefined command
+            System.out.println("'" + input + "' is not a valid command.");
+            return false;
+        }
+
+        System.out.println("Selected operation " + opID + ": " + GutenbergConnection.getOperationSignature(opID));
+        Class op = GutenbergConnection.OPERATIONS[opID];
+        Constructor opConstructor = op.getConstructors()[0];
+
+        Operation preparedOperation;
+        try {
+            preparedOperation = (Operation) opConstructor.newInstance();
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException _) {
+            System.out.println("Something went wrong processing operation '" + op.getSimpleName() + "'.");
+            return false;
+        }
+
+        Field[] parameters = op.getFields();
+
+
+        if (parameters.length > 0) {
+            HashSet<String> requiredParameters = new HashSet<>();
+            for (Field p : parameters) {
+                if (p.getType() != Optional.class)
+                    requiredParameters.add(p.getName());
+            }
+
+            while (true) {
+                System.out.print("Enter parameter assignment (or leave blank to submit): ");
+                String assignment = in.nextLine();
+
+                if (assignment.isBlank()) {
+
+                    if (!requiredParameters.isEmpty()) {
+                        System.out.print("Missing required parameters: ");
+                        System.out.println(String.join(",", requiredParameters));
+                        continue;
+                    }
+
+                    break; // Break out of the assignment loop
+                }
+
+                int splitIndex = assignment.indexOf("=");
+                if (splitIndex < 0) {
+                    System.out.println("Parameter assignment '" + assignment + "' missing equals sign.");
+                    continue; // ask for a new parameter assignment
+                }
+
+                String parameterName = assignment.substring(0, splitIndex).strip();
+                Field parameter;
+                try {
+                    parameter = op.getField(parameterName);
+                } catch (NoSuchFieldException _) {
+                    System.out.println("No such parameter '" + parameterName + "'.");
+                    continue; // ask for a new parameter assignment
+                }
+
+                Class parameterType = parameter.getType();
+                if (parameterType == Optional.class)
+                    parameterType = Util.getTypeFromOptionalParameter(parameter);
+
+                String parameterStringedValue = assignment.substring(splitIndex + 1).strip();
+                Object castParameter;
+
+                // Cast parameters to the proper type
+                if (parameterType == String.class) {
+                    castParameter = parameterStringedValue;
+                } else if (parameterType == int.class) {
+                    try {
+                        castParameter = Integer.parseInt(parameterStringedValue);
+                    } catch (NumberFormatException _) {
+                        System.out.println("Parameter '" + parameterName + "' must be an integer.");
+                        continue; // ask for a new parameter assignment
+                    }
+                } else if (parameterType == float.class) {
+                    try {
+                        castParameter = Integer.parseInt(parameterStringedValue);
+                    } catch (NumberFormatException _) {
+                        System.out.println("Parameter '" + parameterName + "' must be a float.");
+                        continue; // ask for a new parameter assignment
+                    }
+                } else {
+                    throw new RuntimeException("Operation '" + op.getSimpleName() +
+                            "' used unparseable parameter type '" + parameterType.getSimpleName() + "'.");
+                }
+
+                try {
+                    if (parameter.getType() == Optional.class)
+                        parameter.set(preparedOperation, Optional.of(castParameter));
+                    else parameter.set(preparedOperation, castParameter);
+                } catch (IllegalAccessException e) {
+                    System.out.println("Cannot set parameter '" + parameterName + "'. Must be declared public.");
+                    continue; // ask for a new parameter assignment
+                }
+
+                requiredParameters.remove(parameterName);
+            }
+
+            // Confirm the operation before we process it
+            StringBuilder confirmationCheck = new StringBuilder("Final operation: ").append(op.getSimpleName()).append("(");
+            for (int paramID = 0; paramID < parameters.length; paramID++) {
+                Field p = parameters[paramID];
+                Class pType = p.getType();
+                Object pValue;
+                try {
+                    pValue = p.get(preparedOperation);
+                } catch (IllegalAccessException e) {
+                    System.out.println("Cannot set parameter '" + p.getName() + "'. Must be declared public.");
+                    return false; // cancel operation
+                }
+
+                if (pType == Optional.class) {
+                    if (((Optional) pValue).isEmpty())
+                        continue;
+                    else {
+                        pType = Util.getTypeFromOptionalParameter(p);
+                        pValue = ((Optional) pValue).get();
+                    }
+                }
+
+                if (paramID != 0) confirmationCheck.append(", ");
+
+                confirmationCheck.append(p.getName()).append("=");
+                if (pType == String.class) {
+                    confirmationCheck.append("\"").append(pValue).append("\"");
+                } else confirmationCheck.append(pValue);
+            }
+            confirmationCheck.append(")");
+            System.out.println(confirmationCheck);
+        }
+
+        System.out.print("Confirm? (y/n) ");
+        String confirmString = in.nextLine();
+        if (!confirmString.equalsIgnoreCase("y")) {
+            System.out.println("\nOPERATION CANCELLED");
+            return false; // They don't want this operation, cancel it
+        }
+
+        // Call the operation with the proper parameters
+        try {
+            System.out.println("\nProcessing operation...");
+            gbConn.execute(preparedOperation);
+            System.out.println("OPERATION COMPLETE");
+        } catch (FailedOperationException e) {
+            System.out.println("OPERATION FAILED! " + e.getMessage());
+        }
+
+        return false;
     }
 }

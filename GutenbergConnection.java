@@ -1,4 +1,6 @@
 import operations.Operation;
+import operations.publications.AssignEditorToPublication;
+import operations.publications.DeletePublication;
 import operations.publications.UpdatePublication;
 
 import java.lang.reflect.Field;
@@ -22,8 +24,8 @@ public class GutenbergConnection {
     private Statement stmt;
 
     public static final Class[] OPERATIONS = new Class[]{
-            UpdatePublication.class
-            DeletePublication.class
+            UpdatePublication.class,
+            DeletePublication.class,
             AssignEditorToPublication.class
     };
 

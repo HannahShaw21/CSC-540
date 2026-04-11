@@ -35,9 +35,9 @@ public class DeletePublication extends Operation {
             int rowsAffected = stmt.executeUpdate(sql);
             
             if (rowsAffected > 0) {
-                System.out.println("Success: Publication " + pubID + " has been deleted.");
+                System.out.println("Publication " + pubID + " has been deleted.");
             } else {
-                System.out.println("Notice: No publication was found with ID " + pubID + ".");
+                throw new FailedOperationException("No publication was found with ID " + pubID + ".");
             }
         } catch (SQLException e) {
             // Throw Tyler's custom exception if the database complains
