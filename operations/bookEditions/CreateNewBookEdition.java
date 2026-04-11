@@ -25,13 +25,13 @@ public class CreateNewBookEdition extends Operation {
     @Override
     public void run(Statement stmt) {
         String sqlBook = "INSERT INTO BookEditions (isbn, editionNum, pubDate, writtenDate) VALUES (" +
-                         "'" + isbn + "', " + 
+                         "\"" + isbn + "\", " +
                          editionNum + ", " + 
-                         "'" + pubDate.toString() + "', " + 
-                         "'" + writtenDate.toString() + "');";
+                         "\"" + pubDate.toString() + "\", " +
+                         "\"" + writtenDate.toString() + "\");";
 
         String sqlLink = "INSERT INTO EditionOf (isbn, pubID) VALUES (" +
-                         "'" + isbn + "', " + pubID + ");";
+                         "\"" + isbn + "\", " + pubID + ");";
 
         try {
             // 1. Start the transaction
