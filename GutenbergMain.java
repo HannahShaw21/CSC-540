@@ -109,24 +109,28 @@ public class GutenbergMain {
 
         Field[] parameters = op.getFields();
 
-
         if (parameters.length > 0) {
+            // This operation has some parameters.
+            // Read them from the user.
+
+            // Use this set to make sure all required parameters are met
             HashSet<String> requiredParameters = new HashSet<>();
             for (Field p : parameters) {
                 if (p.getType() != Optional.class)
                     requiredParameters.add(p.getName());
             }
 
+            // Loop to read in parameter assignments
             while (true) {
                 System.out.print("Enter parameter assignment (or leave blank to submit): ");
                 String assignment = in.nextLine();
 
                 if (assignment.isBlank()) {
-
+                    // User is trying to submit their operation
                     if (!requiredParameters.isEmpty()) {
                         System.out.print("Missing required parameters: ");
                         System.out.println(String.join(",", requiredParameters));
-                        continue;
+                        continue; // ask for more parameter assignments
                     }
 
                     break; // Break out of the assignment loop
@@ -138,6 +142,7 @@ public class GutenbergMain {
                     continue; // ask for a new parameter assignment
                 }
 
+                // Get the name of the parameter being assigned
                 String parameterName = assignment.substring(0, splitIndex).strip();
                 Field parameter;
                 try {
@@ -147,14 +152,16 @@ public class GutenbergMain {
                     continue; // ask for a new parameter assignment
                 }
 
+                // Get the type of the parameter
                 Class parameterType = parameter.getType();
                 if (parameterType == Optional.class)
                     parameterType = Util.getTypeFromOptionalParameter(parameter);
 
+                // Get the value the user is trying to assign
                 String parameterStringedValue = assignment.substring(splitIndex + 1).strip();
                 Object castParameter;
 
-                // Cast parameters to the proper type
+                // Attempt to cast value to the proper type
                 if (parameterType == String.class) {
                     castParameter = parameterStringedValue;
                 } else if (parameterType == int.class) {
@@ -176,6 +183,7 @@ public class GutenbergMain {
                             "' used unparseable parameter type '" + parameterType.getSimpleName() + "'.");
                 }
 
+                // Assign the value to the parameter
                 try {
                     if (parameter.getType() == Optional.class)
                         parameter.set(preparedOperation, Optional.of(castParameter));
@@ -185,10 +193,11 @@ public class GutenbergMain {
                     continue; // ask for a new parameter assignment
                 }
 
+                // Mark the parameter as included
                 requiredParameters.remove(parameterName);
             }
 
-            // Confirm the operation before we process it
+            // Print out the finalized version of the operation
             StringBuilder confirmationCheck = new StringBuilder("Final operation: ").append(op.getSimpleName()).append("(");
             for (int paramID = 0; paramID < parameters.length; paramID++) {
                 Field p = parameters[paramID];
@@ -201,9 +210,10 @@ public class GutenbergMain {
                     return false; // cancel operation
                 }
 
+                // Optional parameters require a bit more logic
                 if (pType == Optional.class) {
                     if (((Optional) pValue).isEmpty())
-                        continue;
+                        continue; // Empty optional parameter, don't bother displaying
                     else {
                         pType = Util.getTypeFromOptionalParameter(p);
                         pValue = ((Optional) pValue).get();
@@ -221,6 +231,7 @@ public class GutenbergMain {
             System.out.println(confirmationCheck);
         }
 
+        // Ask for confirmation
         System.out.print("Confirm? (y/n) ");
         String confirmString = in.nextLine();
         if (!confirmString.equalsIgnoreCase("y")) {
