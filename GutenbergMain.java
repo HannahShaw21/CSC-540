@@ -162,25 +162,12 @@ public class GutenbergMain {
                 Object castParameter;
 
                 // Attempt to cast value to the proper type
-                if (parameterType == String.class) {
-                    castParameter = parameterStringedValue;
-                } else if (parameterType == int.class) {
-                    try {
-                        castParameter = Integer.parseInt(parameterStringedValue);
-                    } catch (NumberFormatException _) {
-                        System.out.println("Parameter '" + parameterName + "' must be an integer.");
-                        continue; // ask for a new parameter assignment
-                    }
-                } else if (parameterType == float.class) {
-                    try {
-                        castParameter = Integer.parseInt(parameterStringedValue);
-                    } catch (NumberFormatException _) {
-                        System.out.println("Parameter '" + parameterName + "' must be a float.");
-                        continue; // ask for a new parameter assignment
-                    }
-                } else {
-                    throw new RuntimeException("Operation '" + op.getSimpleName() +
-                            "' used unparseable parameter type '" + parameterType.getSimpleName() + "'.");
+                try {
+                    castParameter = Util.parseObjectFromString(parameterStringedValue, parameterType);
+                } catch (Util.ParseObjectException e) {
+                    System.out.println("Parameter '" + parameterName + "' must be " +
+                            parameterType.getSimpleName() + ".");
+                    continue; // ask for a new parameter assignment
                 }
 
                 // Assign the value to the parameter
