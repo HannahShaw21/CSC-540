@@ -1,7 +1,4 @@
-package operations.distributors;
-
-import operations.FailedOperationException;
-import operations.Operation;
+package gutenberg.operations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +19,7 @@ public class ListDistributors extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        // FIXED: Using 'Distributors' and ordering by name for a better report
+        // SQL targets the 'Distributors' table
         String sql = "SELECT * FROM Distributors ORDER BY distributorName ASC;";
 
         try {
@@ -37,7 +34,7 @@ public class ListDistributors extends Operation {
             boolean found = false;
             while (rs.next()) {
                 found = true;
-                // FIXED: Column names matched to your CreateNewDistributor logic
+                // Using corrected column names to match the schema
                 System.out.printf("%-20s | %-10s | %-15s | %-12s | $%-11.2f | $%-9.2f\n", 
                     rs.getString("distributorName"),
                     rs.getString("type"),
@@ -53,7 +50,7 @@ public class ListDistributors extends Operation {
             System.out.println("-------------------------------------------------------------------------------------------------\n");
 
         } catch (SQLException e) {
-            // Providing a more descriptive error for debugging
+            // No import needed for FailedOperationException since it's now in the same package
             throw new FailedOperationException("Failed to retrieve distributor list. Error: " + e.getMessage());
         }
     }
