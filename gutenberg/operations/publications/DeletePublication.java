@@ -1,47 +1,45 @@
-package gutenberg.operations.publications;
-
-import gutenberg.operations.FailedOperationException;
-import gutenberg.operations.Operation;
+package gutenberg.operations;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Implementation of the DeletePublication operation.
- * Removes a publication record from the database based on its unique ID.
+ * Task 1.7: Remove a publication record from the database.
+ * <p>
+ * This operation deletes a base publication entry. Note that if foreign 
+ * key constraints are active without CASCADE, this will fail if the 
+ * publication has linked editions or issues.
+ * </p>
  */
 public class DeletePublication extends Operation {
 
-    /** The ID of the publication to be deleted. */
+    /** The unique ID of the publication to be removed. */
     public int pubID;
 
-    /**
-     * Default constructor required for reflection.
-     */
     public DeletePublication() {}
 
     /**
      * Executes the SQL DELETE command.
-     * @param stmt The active Statement provided by the gutenberg.GutenbergConnection.
-     * @throws FailedOperationException if a database error occurs.
+     * @param stmt The active JDBC Statement.
+     * @throws FailedOperationException if the ID is missing or a database constraint prevents deletion.
      */
     @Override
     public void run(Statement stmt) {
-        // Build the SQL string based on Tyler's style
-        String sql = "DELETE FROM Publications WHERE pubID =" + pubID + ";";
+        // Since pubID is an integer, no quotes are required.
+        String sql = "DELETE FROM Publications WHERE pubID = " + pubID + ";";
 
         try {
-            // executeUpdate returns the number of rows affected
             int rowsAffected = stmt.executeUpdate(sql);
             
             if (rowsAffected > 0) {
-                System.out.println("Publication " + pubID + " has been deleted.");
+                System.out.println("Success: Publication " + pubID + " and its metadata have been removed.");
             } else {
-                throw new FailedOperationException("No publication was found with ID " + pubID + ".");
+                // Using the team's custom exception for missing records
+                throw new FailedOperationException("No publication found with ID " + pubID + ". Nothing was deleted.");
             }
         } catch (SQLException e) {
-            // Throw Tyler's custom exception if the database complains
-            throw new FailedOperationException("Failed to delete publication: " + e.getMessage());
+            // This usually catches Foreign Key violations
+            throw new FailedOperationException("Could not delete publication: " + e.getMessage());
         }
     }
 }
