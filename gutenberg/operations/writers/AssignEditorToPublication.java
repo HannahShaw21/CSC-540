@@ -1,4 +1,7 @@
-package gutenberg.operations;
+package gutenberg.operations.writers;
+
+import gutenberg.operations.FailedOperationException;
+import gutenberg.operations.Operation;
 
 import java.sql.SQLException;
 import java.sql.Statement;

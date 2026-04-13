@@ -1,4 +1,7 @@
-package gutenberg.operations;
+package gutenberg.operations.writers;
+
+import gutenberg.operations.FailedOperationException;
+import gutenberg.operations.Operation;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,7 +13,7 @@ import java.sql.Statement;
  * in the 'Edits' table without deleting the writer or publication themselves.
  * </p>
  */
-public class RemoveEditorsFromPublication extends Operation {
+public class RemoveEditorFromPublication extends Operation {
 
     /** The ID of the writer to be removed from the editorial team. */
     public int writerID;
@@ -18,7 +21,7 @@ public class RemoveEditorsFromPublication extends Operation {
     /** The ID of the publication they are being removed from. */
     public int pubID;
 
-    public RemoveEditorsFromPublication() {}
+    public RemoveEditorFromPublication() {}
 
     /**
      * Executes the SQL DELETE command on the 'Edits' table.

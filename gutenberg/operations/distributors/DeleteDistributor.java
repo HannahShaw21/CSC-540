@@ -1,7 +1,7 @@
-package operations.distributors;
+package gutenberg.operations.distributors;
 
-import operations.FailedOperationException;
-import operations.Operation;
+import gutenberg.operations.FailedOperationException;
+import gutenberg.operations.Operation;
 
 import java.sql.SQLException;
 import java.sql.Statement;

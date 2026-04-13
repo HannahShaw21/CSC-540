@@ -86,7 +86,7 @@ public class GutenbergMain {
                 System.out.println(group.getName().toUpperCase());
 
                 for (Class op : group) {
-                    System.out.format("    - %d: %s\n", id, GutenbergConnection.getOperationSignature(op));
+                    System.out.format("    - %d: %s\n", id, op.getSimpleName());
                     id++;
                 }
             }

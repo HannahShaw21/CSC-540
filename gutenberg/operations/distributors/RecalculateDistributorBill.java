@@ -1,4 +1,7 @@
-package gutenberg.operations;
+package gutenberg.operations.distributors;
+
+import gutenberg.operations.FailedOperationException;
+import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,7 +49,7 @@ public class RecalculateDistributorBill extends Operation {
             int rowsAffected = stmt.executeUpdate(updateSql);
 
             if (rowsAffected > 0) {
-                System.out.printf("Success: Recalculated bill for '%s'. New 'Total Billed' is $%.2f\n", 
+                System.out.printf("Success: Recalculated bill for '%s'. New 'Total Billed' is $%.2f\n",
                                   distributor, updatedTotal);
             } else {
                 System.out.println("Notice: No distributor found with name '" + distributor + "'. No changes made.");

@@ -1,11 +1,15 @@
 package gutenberg;
 
-import gutenberg.operations.Operation;
-import gutenberg.operations.OperationGroup;
-import gutenberg.operations.publications.AssignEditorToPublication;
-import gutenberg.operations.publications.CreateNewPublication;
-import gutenberg.operations.publications.DeletePublication;
-import gutenberg.operations.publications.UpdatePublication;
+import gutenberg.operations.*;
+
+import gutenberg.operations.orders.*;
+import gutenberg.operations.articles.*;
+import gutenberg.operations.bookEditions.*;
+import gutenberg.operations.chapters.*;
+import gutenberg.operations.distributors.*;
+import gutenberg.operations.issues.*;
+import gutenberg.operations.publications.*;
+import gutenberg.operations.writers.*;
 
 import java.lang.reflect.Field;
 
@@ -31,10 +35,60 @@ public class GutenbergConnection {
             new OperationGroup("Publications",
                     CreateNewPublication.class,
                     UpdatePublication.class,
-                    DeletePublication.class
+                    DeletePublication.class,
+                    GetPublicationInfo.class,
+                    ListPublications.class,
+                    ListPublicationsForEditor.class
             ),
-            new OperationGroup("Editors",
-                    AssignEditorToPublication.class
+            new OperationGroup("Book Editions",
+                    CreateNewBookEdition.class,
+                    UpdateBookEdition.class,
+                    DeleteBookEdition.class,
+                    SearchBookEditionsByAuthor.class,
+                    SearchBookEditionsByDate.class,
+                    SearchBookEditionsByTopic.class
+            ),
+            new OperationGroup("Chapters",
+                    CreateNewChapter.class,
+                    UpdateChapter.class,
+                    DeleteChapter.class
+            ),
+            new OperationGroup("Issues",
+                    CreateNewIssue.class,
+                    UpdateIssue.class,
+                    DeleteIssue.class,
+                    CompareIssues.class
+            ),
+            new OperationGroup("Articles",
+                    CreateNewArticle.class,
+                    UpdateArticle.class,
+                    DeleteArticle.class,
+                    SearchArticlesByAuthor.class,
+                    SearchArticlesByDate.class,
+                    SearchArticlesByTopic.class
+            ),
+            new OperationGroup("Writers",
+                    CreateNewWriter.class,
+                    ListWriters.class,
+                    AssignEditorToPublication.class,
+                    RemoveEditorFromPublication.class,
+                    EnterPaymentForWriter.class,
+                    ClaimPayment.class,
+                    ListUnclaimedPayments.class
+            ),
+            new OperationGroup("Distributors",
+                    CreateNewDistributor.class,
+                    UpdateDistributor.class,
+                    DeleteDistributor.class,
+                    ListDistributors.class,
+                    SearchDistributors.class,
+                    AddPaymentFromDistributor.class,
+                    RecalculateDistributorBill.class,
+                    ListDistributorsNonzeroBalance.class
+            ),
+            new OperationGroup("Orders",
+                    PlaceBookOrder.class,
+                    PlaceIssueOrder.class
             )
     };
 
