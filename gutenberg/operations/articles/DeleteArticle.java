@@ -6,29 +6,37 @@ import gutenberg.operations.Operation;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Task 1.7: Remove an article record from the database.
+ * <p>
+ * This operation deletes an article entry based on its unique ID.
+ * </p>
+ */
 public class DeleteArticle extends Operation {
 
-    public int issueID;
-    public int articleNum;
+    /** The unique ID of the article to be deleted. */
+    public int articleID;
 
     public DeleteArticle() {}
 
+    /**
+     * Executes the SQL DELETE command on the Articles table.
+     * * @param stmt The active JDBC Statement.
+     * @throws FailedOperationException If the articleID is not found or is linked to other records.
+     */
     @Override
     public void run(Statement stmt) {
-        String sql = "DELETE FROM articles WHERE articleNum = \"" + articleNum + "\";";
+        String sql = "DELETE FROM Articles WHERE articleID = " + articleID + ";";
 
         try {
-            int rowsAffected = stmt.executeUpdate(sql);
-            
-            if (rowsAffected > 0) {
-                System.out.println("Success: Article '" + articleNum + "' and its related data have been deleted.");
+            int rows = stmt.executeUpdate(sql);
+            if (rows > 0) {
+                System.out.println("Success: Article " + articleID + " has been removed.");
             } else {
-                // If rowsAffected is 0, the articleNum didn't exist in the table
-                System.out.println("Notice: No article was found with articleNum '" + articleNum + "'. Nothing was deleted.");
+                throw new FailedOperationException("No article found with ID " + articleID);
             }
         } catch (SQLException e) {
-            // Throw custom exception to handle the error gracefully in the CLI
-            throw new FailedOperationException("Failed to delete article: " + e.getMessage());
+            throw new FailedOperationException("Could not delete article: " + e.getMessage());
         }
     }
 }
