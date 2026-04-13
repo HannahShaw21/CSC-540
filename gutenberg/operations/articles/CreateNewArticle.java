@@ -11,24 +11,33 @@ import java.time.LocalDate;
 /**
  * Task 1.2: Enter a new article record for a specific periodical issue.
  * <p>
- * This operation records the article's metadata including its position in the issue,
- * title, content, and the date it was authored.
+ * This operation records the article's position in the issue, its title,
+ * the authorship date, and the full content string.
  * </p>
  */
 public class CreateNewArticle extends Operation {
 
+    /** The unique ID of the issue this article belongs to. */
     public int issueID;
+
+    /** The sequence number/position of the article within the issue. */
     public int articleNum;
+
+    /** The title of the article. */
     public String title;
+
+    /** The date the article was written/finalized. */
     public LocalDate writtenDate;
+
+    /** The full text content of the article. */
     public String content;
 
     public CreateNewArticle() {}
 
     /**
-     * Executes the SQL INSERT and retrieves the auto-generated ID.
-     * @param stmt The active JDBC Statement.
-     * @throws FailedOperationException if the issueID is invalid or SQL fails.
+     * Executes the SQL INSERT and retrieves the auto-generated articleID.
+     * * @param stmt The active JDBC Statement used to communicate with the database.
+     * @throws FailedOperationException If the issueID does not exist or a database error occurs.
      */
     @Override
     public void run(Statement stmt) {
@@ -44,13 +53,13 @@ public class CreateNewArticle extends Operation {
             ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID();");
 
             if (rs.next()) {
-                System.out.println("\n--- Article Created ---");
+                System.out.println("\n--- Article Creation Success ---");
                 System.out.println("New Article ID : " + rs.getInt(1));
                 System.out.println("Title          : " + title);
-                System.out.println("Issue Linked   : " + issueID + "\n");
+                System.out.println("Issue ID       : " + issueID + "\n");
             }
         } catch (SQLException e) {
-            throw new FailedOperationException("Failed to create article. Check if Issue ID " + issueID + " exists. Error: " + e.getMessage());
+            throw new FailedOperationException("Failed to create article: " + e.getMessage());
         }
     }
 }
