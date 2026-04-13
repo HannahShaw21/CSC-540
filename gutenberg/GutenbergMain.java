@@ -2,6 +2,7 @@ package gutenberg;
 
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
+import gutenberg.operations.OperationGroup;
 
 import java.lang.reflect.*;
 import java.sql.SQLException;
@@ -80,8 +81,14 @@ public class GutenbergMain {
             return true;
         if (input.equalsIgnoreCase("list")) {
             System.out.println("(Square Brackets indicate an optional parameter)");
-            for (int i = 0; i < GutenbergConnection.OPERATIONS.length; i++) {
-                System.out.println(i + ": " + GutenbergConnection.getOperationSignature(i));
+            int id = 0;
+            for (OperationGroup group : GutenbergConnection.OPERATION_GROUPS) {
+                System.out.println(group.getName().toUpperCase());
+
+                for (Class op : group) {
+                    System.out.format("    - %d: %s\n", id, GutenbergConnection.getOperationSignature(op));
+                    id++;
+                }
             }
             return false;
         }
@@ -126,21 +133,23 @@ public class GutenbergMain {
         int opID;
         try {
             opID = Integer.parseInt(input);
-            if (opID < 0 || opID >= GutenbergConnection.OPERATIONS.length) {
-                // Input was not a valid operation ID
-                System.out.println("Found no operation with ID " + opID + ".\n" +
-                        "Use 'LIST' command to see all available operations");
-                return false;
-            }
-
         } catch (NumberFormatException _) {
             // Input was not a number, and wasn't a predefined command
             System.out.println("'" + input + "' is not a valid command.");
             return false;
         }
 
-        System.out.println("Selected operation " + opID + ": " + GutenbergConnection.getOperationSignature(opID));
-        Class op = GutenbergConnection.OPERATIONS[opID];
+        Class op;
+        try {
+            op = GutenbergConnection.getOperation(opID);
+            System.out.println("Selected operation " + opID + ": " + GutenbergConnection.getOperationSignature(op));
+        } catch (IndexOutOfBoundsException _) {
+            // Input was not a valid operation ID
+            System.out.println("Found no operation with ID " + opID + ".\n" +
+                    "Use 'LIST' command to see all available operations");
+            return false;
+        }
+
         Constructor opConstructor = op.getConstructors()[0];
 
         Operation preparedOperation;
@@ -166,7 +175,7 @@ public class GutenbergMain {
 
             // Loop to read in parameter assignments
             while (true) {
-                System.out.print("Enter parameter assignment (or leave blank to submit): ");
+                System.out.print("Enter parameter assignment (leave blank to submit, or 'CANCEL' to cancel): ");
                 String assignment = in.nextLine();
 
                 if (assignment.isBlank()) {
@@ -178,6 +187,12 @@ public class GutenbergMain {
                     }
 
                     break; // Break out of the assignment loop
+                }
+
+                // User is trying to cancel the operation
+                if (assignment.equalsIgnoreCase("cancel")) {
+                    System.out.println("\nOPERATION CANCELLED");
+                    return false;
                 }
 
                 int splitIndex = assignment.indexOf("=");

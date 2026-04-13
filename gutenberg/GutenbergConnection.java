@@ -1,6 +1,7 @@
 package gutenberg;
 
 import gutenberg.operations.Operation;
+import gutenberg.operations.OperationGroup;
 import gutenberg.operations.publications.AssignEditorToPublication;
 import gutenberg.operations.publications.CreateNewPublication;
 import gutenberg.operations.publications.DeletePublication;
@@ -26,22 +27,62 @@ public class GutenbergConnection {
     private Connection con;
     private Statement stmt;
 
-    public static final Class[] OPERATIONS = new Class[]{
-            CreateNewPublication.class,
-            UpdatePublication.class,
-            DeletePublication.class,
-            AssignEditorToPublication.class
+    public static final OperationGroup[] OPERATION_GROUPS = new OperationGroup[]{
+            new OperationGroup("Publications",
+                    CreateNewPublication.class,
+                    UpdatePublication.class,
+                    DeletePublication.class
+            ),
+            new OperationGroup("Editors",
+                    AssignEditorToPublication.class
+            )
     };
 
     /**
-     * Returns a String representing the method signature of the specified operation.
+     * Gets the operation with the given ID.
      * @param id the ID of the desired operation
+     * @return the operation associated with the given ID
+     */
+    public static Class getOperation(int id) {
+        if (id < 0) throw new IndexOutOfBoundsException("Tried to access non-existent operation");
+
+        OperationGroup parentGroup = null;
+        for (OperationGroup group : OPERATION_GROUPS) {
+            if (group.getOperationCount() <= id) id -= group.getOperationCount();
+            else {
+                parentGroup = group;
+                break;
+            }
+        }
+
+        if (parentGroup == null) throw new IndexOutOfBoundsException("Tried to access non-existent operation");
+
+        return parentGroup.getOperation(id);
+    }
+
+    /**
+     * Returns the total number of registered operations.
+     * @return the total number of registered operations
+     */
+    public static int getOperationCount() {
+        int count = 0;
+        for (OperationGroup g : OPERATION_GROUPS)
+            count += g.getOperationCount();
+        return count;
+    }
+
+    /**
+     * Returns a String representing the method signature of the specified operation.
+     * @param op the Class of the desired operation
      * @return a String containing the operation's method signature
      *
-     * @throws IndexOutOfBoundsException if no operation with the given ID exists
+     * @throws IllegalArgumentException if the given class isn't an operation
      */
-    public static String getOperationSignature(int id) {
-        Class op = OPERATIONS[id];
+    public static String getOperationSignature(Class op) {
+        if (op.getSuperclass() != Operation.class) {
+            throw new IllegalArgumentException("Tried to fetch signature of non-operation class '" + op.getSimpleName() + "'");
+        }
+
         StringBuilder sb = new StringBuilder();
 
         sb.append(op.getSimpleName()).append("(");
@@ -61,6 +102,17 @@ public class GutenbergConnection {
         return sb.toString();
     }
 
+    /**
+     * Returns a String representing the method signature of the specified operation.
+     * @param id the ID of the desired operation
+     * @return a String containing the operation's method signature
+     *
+     * @throws IndexOutOfBoundsException if no operation with the given ID exists
+     */
+    public static String getOperationSignature(int id) {
+        Class op = getOperation(id);
+        return getOperationSignature(op);
+    }
 
     /**
      * Creates and initializes a connection to the Gutenberg database using the given credentials.
