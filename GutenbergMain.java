@@ -44,11 +44,14 @@ public class GutenbergMain {
         }
 
         try {
-            System.out.println("Connected to database! Use the following commands:\n" +
-                    "- QUIT: exits the program\n" +
-                    "- LIST: lists all the operations\n" +
-                    "- REBUILD: reconstructs all tables in the database\n" +
-                    "- <operationID>: runs the operation associated with the given ID\n");
+            System.out.println("""
+                    Connected to database! Use the following commands:
+                    - QUIT: exits the program
+                    - LIST: lists all the operations
+                    - REBUILD: reconstructs all tables in the database
+                    - RESET: rebuilds the database and fills it with initial information
+                    - <operationID>: runs the operation associated with the given ID
+                    """);
 
             // Entering main CLI loop
             while (true)
@@ -95,6 +98,24 @@ public class GutenbergMain {
                 return false;
             } else {
                 System.out.println("Rebuild failed.");
+                return false;
+            }
+        }
+        if (input.equalsIgnoreCase("RESET")) {
+            System.out.print("Resetting the database will delete all existing information.\n" +
+                    "Confirm? (y/n) ");
+            String confirmString = in.nextLine();
+            if (!confirmString.equalsIgnoreCase("y")) {
+                System.out.println("Reset cancelled.");
+                return false;
+            }
+
+            System.out.println("Resetting database...");
+            if (gbConn.resetToDummyData()) {
+                System.out.println("Reset successful!");
+                return false;
+            } else {
+                System.out.println("Reset failed.");
                 return false;
             }
         }
