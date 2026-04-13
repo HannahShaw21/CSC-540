@@ -1,13 +1,17 @@
-package gutenberg.operations.publications;
-import gutenberg.Util;
-import gutenberg.operations.FailedOperationException;
-import gutenberg.operations.Operation;
+package gutenberg.operations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
+/**
+ * Task 1.1: Create a new publication record.
+ * <p>
+ * This operation adds a base publication (Book or Periodical) to the system.
+ * It automatically retrieves the generated pubID for confirmation.
+ * </p>
+ */
 public class CreateNewPublication extends Operation {
 
     public String title;
@@ -17,28 +21,38 @@ public class CreateNewPublication extends Operation {
 
     public CreateNewPublication() {}
 
+    /**
+     * Executes the insertion and retrieves the auto-incremented ID.
+     * @param stmt The active JDBC Statement.
+     * @throws FailedOperationException if the insertion fails or ID retrieval fails.
+     */
     @Override
     public void run(Statement stmt) {
-        String sqlCreation = String.format("INSERT INTO Publications(title, topic, type, periodicity) VALUES (%s, %s, %s, %s);",
-                        Util.sqlStrWrapper(title),
-                        Util.sqlStrWrapper(topic),
-                        Util.sqlStrWrapper(type),
-                        Util.sqlStrWrapper(periodicity)
-        );
+        // Handling the Optional periodicity for the SQL string
+        String periodicityVal = periodicity.isPresent() ? "\"" + periodicity.get() + "\"" : "NULL";
+
+        String sql = "INSERT INTO Publications (title, topic, type, periodicity) VALUES (" +
+                     "\"" + title + "\", " + 
+                     "\"" + topic + "\", " + 
+                     "\"" + type + "\", " + 
+                     periodicityVal + ");";
 
         try {
-            stmt.executeUpdate(sqlCreation);
-            stmt.execute("SELECT LAST_INSERT_ID();");
+            stmt.executeUpdate(sql);
+            
+            // Retrieving the new ID assigned by the database
+            ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID();");
 
-            ResultSet rs = stmt.getResultSet();
             if (rs.next()) {
                 int pubID = rs.getInt(1);
-
-                System.out.print("Success: Added new publication (pubID = ");
-                System.out.print(pubID);
-                System.out.println(")");
+                System.out.println("\n--- Publication Created ---");
+                System.out.println("Success: New entry added to registry.");
+                System.out.println("Publication ID : " + pubID);
+                System.out.println("Title          : " + title);
+                System.out.println("Type           : " + type);
+                System.out.println("---------------------------\n");
             } else {
-                throw new FailedOperationException("Something went wrong: Couldn't access new publication's pubID");
+                throw new FailedOperationException("Publication created, but failed to retrieve the new ID.");
             }
         } catch (SQLException e) {
             throw new FailedOperationException("Could not create new publication: " + e.getMessage());
