@@ -28,7 +28,6 @@ public class SearchBookEditionsByTopic extends Operation {
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("\n--- Books related to: " + topic + " ---");
 
             List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {

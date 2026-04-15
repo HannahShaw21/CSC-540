@@ -51,7 +51,8 @@ public class GutenbergConnection {
             new OperationGroup("Chapters",
                     CreateNewChapter.class,
                     UpdateChapter.class,
-                    DeleteChapter.class
+                    DeleteChapter.class,
+                    ListChaptersForBookEdition.class
             ),
             new OperationGroup("Issues",
                     CreateNewIssue.class,
@@ -72,6 +73,10 @@ public class GutenbergConnection {
                     ListWriters.class,
                     AssignEditorToPublication.class,
                     RemoveEditorFromPublication.class,
+                    AssignAuthorToArticle.class,
+                    RemoveAuthorFromArticle.class,
+                    AssignAuthorToBookEdition.class,
+                    RemoveAuthorFromBookEdition.class,
                     EnterPaymentForWriter.class,
                     ClaimPayment.class,
                     ListUnclaimedPayments.class
