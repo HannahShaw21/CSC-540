@@ -1,5 +1,6 @@
 package gutenberg.operations.publications;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
@@ -31,14 +32,12 @@ public class CreateNewPublication extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        // Handling the Optional periodicity for the SQL string
-        String periodicityVal = periodicity.isPresent() ? "\"" + periodicity.get() + "\"" : "NULL";
-
-        String sql = "INSERT INTO Publications (title, topic, type, periodicity) VALUES (" +
-                     "\"" + title + "\", " + 
-                     "\"" + topic + "\", " + 
-                     "\"" + type + "\", " + 
-                     periodicityVal + ");";
+        String sql = String.format("INSERT INTO Publications (title, topic, type, periodicity) VALUES (%s, %s, %s, %s);",
+                        Util.sqlStrWrapper(title),
+                        Util.sqlStrWrapper(topic),
+                        Util.sqlStrWrapper(type),
+                        Util.sqlStrWrapper(periodicity)
+        );
 
         try {
             stmt.executeUpdate(sql);

@@ -1,11 +1,14 @@
 package gutenberg.operations.publications;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 2.8 (General): List all publications in the database.
@@ -28,30 +31,23 @@ public class ListPublications extends Operation {
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            
-            System.out.println("\n--- Master Publication Registry ---");
-            // Header: ID (5), Title (25), Topic (15), Type (12), Periodicity (12)
-            System.out.printf("%-5s | %-25s | %-15s | %-12s | %-12s\n", 
-                              "ID", "Title", "Topic", "Type", "Frequency");
-            System.out.println("-----------------------------------------------------------------------------------");
 
-            boolean hasData = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                hasData = true;
-                String period = rs.getString("periodicity");
-                
-                System.out.printf("%-5d | %-25s | %-15s | %-12s | %-12s\n", 
-                    rs.getInt("pubID"), 
-                    rs.getString("title"), 
-                    rs.getString("topic"), 
-                    rs.getString("type"), 
-                    (period == null || period.isEmpty()) ? "N/A" : period);
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getInt("pubID"));
+                row.add(rs.getString("title"));
+                row.add(rs.getString("topic"));
+                row.add(rs.getString("type"));
+                row.add(rs.getString("periodicity"));
+
+                data.add(row);
             }
 
-            if (!hasData) {
-                System.out.println("The publication registry is currently empty.");
-            }
-            System.out.println("-----------------------------------------------------------------------------------\n");
+            Util.printTable("Master Publication Registry",
+                    List.of("ID", "Title", "Topic", "Type", "Periodicity"),
+                    data
+            );
 
         } catch (SQLException e) {
             throw new FailedOperationException("Failed to retrieve publication list: " + e.getMessage());

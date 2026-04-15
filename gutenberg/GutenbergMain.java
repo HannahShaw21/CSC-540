@@ -280,7 +280,8 @@ public class GutenbergMain {
 
                 confirmationCheck.append(p.getName()).append("=");
                 if (pType == String.class) {
-                    confirmationCheck.append("\"").append(pValue).append("\"");
+                    if (((String)pValue).isEmpty()) confirmationCheck.append("NULL");
+                    else confirmationCheck.append("\"").append(pValue).append("\"");
                 } else confirmationCheck.append(pValue);
             }
             confirmationCheck.append(")");

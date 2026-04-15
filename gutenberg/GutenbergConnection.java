@@ -209,9 +209,9 @@ public class GutenbergConnection {
                     "topic VARCHAR(256)," +
                     "type VARCHAR(8) NOT NULL " +
                     "CHECK (type IN ('book', 'magazine', 'journal'))," +
-                    "periodicity VARCHAR(8)" +
+                    "periodicity VARCHAR(8) " +
                     "CHECK (periodicity IN (NULL, 'weekly', 'monthly', 'yearly')), " +
-                    "CONSTRAINT TypePeriodicityEnforce CHECK (type = 'book' OR periodicity IS NOT NULL)" +
+                    "CONSTRAINT TypePeriodicityEnforce CHECK (type = 'book' XOR periodicity IS NOT NULL)" +
                     ");"
             );
             stmt.execute("CREATE TABLE IF NOT EXISTS BookEditions (" +
@@ -312,14 +312,14 @@ public class GutenbergConnection {
                     "isbn VARCHAR(13) PRIMARY KEY " +
                     "REFERENCES BookEditions(isbn) ON DELETE CASCADE," +
                     "pubID INT NOT NULL " +
-                    "REFERENCES Publications(pubID) ON DELETE CASCADE" +
+                    "REFERENCES Publications(pubID) ON DELETE RESTRICT" +
                     ");"
             );
             stmt.execute("CREATE TABLE IF NOT EXISTS IssueOf (" +
                     "issueID INT PRIMARY KEY " +
                     "REFERENCES Issues(issueID) ON DELETE CASCADE," +
                     "pubID INT NOT NULL " +
-                    "REFERENCES Publications(pubID) ON DELETE CASCADE" +
+                    "REFERENCES Publications(pubID) ON DELETE RESTRICT" +
                     ");"
             );
 

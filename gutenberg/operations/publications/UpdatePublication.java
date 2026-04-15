@@ -1,5 +1,6 @@
 package gutenberg.operations.publications;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
@@ -21,6 +22,7 @@ public class UpdatePublication extends Operation {
     
     public Optional<String> title = Optional.empty();
     public Optional<String> topic = Optional.empty();
+    // We do not allow users to change topic
     public Optional<String> periodicity = Optional.empty();
 
     public UpdatePublication() {}
@@ -42,17 +44,17 @@ public class UpdatePublication extends Operation {
 
         // Dynamic SQL construction
         if (title.isPresent()) {
-            sql.append("title = \"").append(title.get()).append("\"");
+            sql.append("title = ").append(Util.sqlStrWrapper(title.get()));
             notFirst = true;
         }
         if (topic.isPresent()) {
             if (notFirst) sql.append(", ");
-            sql.append("topic = \"").append(topic.get()).append("\"");
+            sql.append("topic = ").append(Util.sqlStrWrapper(topic.get()));
             notFirst = true;
         }
         if (periodicity.isPresent()) {
             if (notFirst) sql.append(", ");
-            sql.append("periodicity = \"").append(periodicity.get()).append("\"");
+            sql.append("periodicity = ").append(Util.sqlStrWrapper(periodicity.get()));
         }
 
         sql.append(" WHERE pubID = ").append(pubID).append(";");

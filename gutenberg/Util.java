@@ -4,7 +4,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Util {
 
@@ -63,11 +68,79 @@ public class Util {
     }
 
     public static String sqlStrWrapper(String str) {
-        return "\"" + str + "\"";
+        return (str.isEmpty()) ? "NULL" : "\"" + str + "\"";
     }
 
     public static String sqlStrWrapper(Optional<String> str) {
-        if (str.isEmpty()) return "NULL";
-        return sqlStrWrapper(str.get());
+        return (str.isEmpty()) ? "NULL" :sqlStrWrapper(str.get());
+    }
+
+    public static void printTable(String tableName, List<String> headers, List<List<Object>> data) {
+        // constants used for spacing
+        int MIN_COLUMN_WIDTH = 5;
+        int HEADER_PADDING = 2;
+
+        // Print table title
+        System.out.print("--- ");
+        System.out.print(tableName);
+        System.out.println(" ---");
+        if (data.isEmpty()) {
+            System.out.println("EMPTY TABLE");
+            return;
+        }
+
+        // Initialize the column widths (minimum column width is 5)
+        List<Integer> columnWidths = new ArrayList<>(Collections.nCopies(headers.size(), MIN_COLUMN_WIDTH));
+        List<List<String>> stringifiedData = new ArrayList<>();
+
+        // Loop through headers and keep track of column widths
+        for (int i = 0; i < headers.size(); i++) {
+            int columnWidth = columnWidths.get(i);
+            String header = headers.get(i);
+            int paddedWidth = header.length() + HEADER_PADDING;
+            if (paddedWidth > columnWidth) columnWidths.set(i, paddedWidth);
+        }
+
+        // Loop through the data. Stringify data and keep track of greatest width per column
+        for (List<Object> row : data) {
+            List<String> stringifiedRow = new ArrayList<>(row.size());
+            int i = 0;
+            for (Object d : row) {
+                String s = (d == null) ? "N/A" : d.toString();
+                stringifiedRow.add(s);
+                int currentMaxLength = columnWidths.get(i);
+                if (s.length() > currentMaxLength)
+                    columnWidths.set(i, s.length());
+                i++;
+            }
+
+            stringifiedData.add(stringifiedRow);
+        }
+
+        // Print headers
+        for (int i = 0; i < headers.size(); i++) {
+            int columnWidth = columnWidths.get(i);
+            if (i != 0) System.out.print(" | ");
+            System.out.printf("%-" + columnWidth + "s", headers.get(i));
+        }
+        System.out.println();
+
+        // Fancy separator
+        int totalTableWidth = columnWidths.stream().mapToInt(Integer::intValue).sum() + (columnWidths.size() - 1) * 3;
+        System.out.println("-".repeat(totalTableWidth));
+
+        // Print data rows
+        for (List<String> row : stringifiedData) {
+            for (int i = 0; i < row.size(); i++) {
+                int columnWidth = columnWidths.get(i);
+                if (i != 0) System.out.print(" | ");
+                System.out.printf("%-" + columnWidth + "s", row.get(i));
+            }
+
+            System.out.println();
+        }
+
+        // Fancy closing separator
+        System.out.println("-".repeat(totalTableWidth));
     }
 }
