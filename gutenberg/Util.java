@@ -37,11 +37,11 @@ public class Util {
         }
 
         try {
-            if (type == int.class) {
+            if (type == int.class || type == Integer.class) {
                 return Integer.parseInt(str);
             }
 
-            if (type == float.class) {
+            if (type == float.class || type == Float.class) {
                 return Integer.parseInt(str);
             }
 
@@ -78,7 +78,7 @@ public class Util {
     public static void printTable(String tableName, List<String> headers, List<List<Object>> data) {
         // constants used for spacing
         int MIN_COLUMN_WIDTH = 5;
-        int HEADER_PADDING = 2;
+        int COLUMN_PADDING = 2;
 
         // Print table title
         System.out.print("--- ");
@@ -97,7 +97,7 @@ public class Util {
         for (int i = 0; i < headers.size(); i++) {
             int columnWidth = columnWidths.get(i);
             String header = headers.get(i);
-            int paddedWidth = header.length() + HEADER_PADDING;
+            int paddedWidth = header.length() + COLUMN_PADDING;
             if (paddedWidth > columnWidth) columnWidths.set(i, paddedWidth);
         }
 
@@ -109,8 +109,9 @@ public class Util {
                 String s = (d == null) ? "N/A" : d.toString();
                 stringifiedRow.add(s);
                 int currentMaxLength = columnWidths.get(i);
-                if (s.length() > currentMaxLength)
-                    columnWidths.set(i, s.length());
+                int paddedWidth = s.length() + COLUMN_PADDING;
+                if (paddedWidth > currentMaxLength)
+                    columnWidths.set(i, paddedWidth);
                 i++;
             }
 

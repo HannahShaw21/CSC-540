@@ -1,11 +1,14 @@
 package gutenberg.operations.bookEditions;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 2.7: Search for book editions by topic.
@@ -20,23 +23,29 @@ public class SearchBookEditionsByTopic extends Operation {
     @Override
     public void run(Statement stmt) {
         // Complex Join from Report 2
-        String sql = "SELECT * FROM BookEditions WHERE isbn IN (" +
-                     "SELECT isbn FROM (SELECT * FROM Publications WHERE topic LIKE \"%" + topic + "%\") relPubs " +
-                     "NATURAL JOIN EditionOf);";
+        String sql = "SELECT * FROM (((SELECT * FROM Publications WHERE topic LIKE \"%" + topic + "%\") relPubs " +
+                "NATURAL JOIN EditionOf) NATURAL JOIN BookEditions);";
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
             System.out.println("\n--- Books related to: " + topic + " ---");
-            System.out.printf("%-15s | %-10s\n", "ISBN", "Edition #");
-            System.out.println("----------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                System.out.printf("%-15s | %-10d\n", rs.getString("isbn"), rs.getInt("editionNum"));
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getInt("pubID"));
+                row.add(rs.getString("isbn"));
+                row.add(rs.getString("title"));
+                row.add(rs.getInt("editionNum"));
+                row.add(rs.getString("topic"));
+
+                data.add(row);
             }
-            if (!found) System.out.println("No books found for this topic.");
-            System.out.println("----------------------------\n");
+
+            Util.printTable("Books related to: " + topic,
+                    List.of("pubID", "ISBN", "Title", "Edition #", "Topic"),
+                    data
+            );
         } catch (SQLException e) {
             throw new FailedOperationException("Topic search failed: " + e.getMessage());
         }
