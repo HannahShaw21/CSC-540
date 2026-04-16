@@ -30,9 +30,8 @@ public class RecalculateDistributorBill extends Operation {
     @Override
     public void run(Statement stmt) {
         // Step 1: Sum up the cost of all orders for this distributor.
-        // Assumes schema: Orders(distributorName, pricePerCopy, numCopies)
-        String calculateSql = "SELECT SUM(pricePerCopy * numCopies) AS totalSum FROM Orders " +
-                              "WHERE distributorName = \"" + distributor + "\";";
+        String calculateSql = "SELECT SUM(unitPrice * quantity) AS totalSum FROM Orders " +
+                              "WHERE disName = \"" + distributor + "\";";
 
         try {
             ResultSet rs = stmt.executeQuery(calculateSql);
@@ -44,7 +43,7 @@ public class RecalculateDistributorBill extends Operation {
 
             // Step 2: Update the master record in the Distributors table.
             String updateSql = "UPDATE Distributors SET totalBilled = " + updatedTotal + " " +
-                               "WHERE distributorName = \"" + distributor + "\";";
+                               "WHERE name = \"" + distributor + "\";";
 
             int rowsAffected = stmt.executeUpdate(updateSql);
 
