@@ -1,8 +1,10 @@
 package gutenberg.operations.issues;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -47,21 +49,21 @@ public class UpdateIssue extends Operation {
 
         if (newTitle.isPresent()) {
             if (addedField) sql.append(",");
-            sql.append(" issueTitle = \"").append(newTitle.get()).append("\"");
+            sql.append(" issueTitle = ").append(Util.sqlStrWrapper(newTitle.get()));
             addedField = true;
         }
 
         if (newPubDate.isPresent()) {
             if (addedField) sql.append(",");
             // Dates also need double quotes
-            sql.append(" pubDate = \"").append(newPubDate.get().toString()).append("\"");
+            sql.append(" pubDate = \"").append(newPubDate.get()).append("\"");
         }
 
         sql.append(" WHERE issueID = ").append(issueID).append(";");
 
         try {
             int rowsAffected = stmt.executeUpdate(sql.toString());
-            
+
             if (rowsAffected > 0) {
                 System.out.println("Success: Issue " + issueID + " has been updated.");
             } else {

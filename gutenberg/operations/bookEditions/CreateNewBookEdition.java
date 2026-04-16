@@ -3,6 +3,7 @@ package gutenberg.operations.bookEditions;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -24,6 +25,8 @@ public class CreateNewBookEdition extends Operation {
 
     @Override
     public void run(Statement stmt) {
+        String sqlPubValidation = String.format("SELECT type FROM Publications WHERE pubID=%d;", pubID);
+
         String sqlBook = "INSERT INTO BookEditions (isbn, editionNum, pubDate, writtenDate) VALUES (" +
                          "\"" + isbn + "\", " +
                          editionNum + ", " + 
@@ -37,13 +40,21 @@ public class CreateNewBookEdition extends Operation {
             // 1. Start the transaction
             stmt.executeUpdate("START TRANSACTION;");
 
-            // 2. Run the first part (Create the Book)
+            // 2. Ensure that a publication of type book exists with the given pubID
+            ResultSet rs = stmt.executeQuery(sqlPubValidation);
+            if (!rs.next())
+                throw new FailedOperationException("No publication found with that ID");
+
+            if (!rs.getString("type").equals("book"))
+                throw new FailedOperationException("Publication #" + pubID + " is not of type 'book'.");
+
+            // 3. Create the BookEdition record
             stmt.executeUpdate(sqlBook);
             
-            // 3. Run the second part (Link to Publication)
+            // 4. Link the BookEdition to the Publication
             stmt.executeUpdate(sqlLink);
             
-            // 4. If we got here, everything worked! Save changes permanently.
+            // 5. If we got here, everything worked! Save changes permanently.
             stmt.executeUpdate("COMMIT;");
             
             System.out.println("Success: Book Edition and Publication Link created atomically.");

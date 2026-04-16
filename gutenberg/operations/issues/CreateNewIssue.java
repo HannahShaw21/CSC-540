@@ -1,8 +1,10 @@
 package gutenberg.operations.issues;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -37,12 +39,11 @@ public class CreateNewIssue extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        // Handling the Optional title for the SQL string
-        String titleVal = issueTitle.isPresent() ? "\"" + issueTitle.get() + "\"" : "NULL";
+        String sqlPubValidation = String.format("SELECT type FROM Publications WHERE pubID=%d;", pubID);
 
         // SQL 1: Insert the basic issue data
         String sqlIssue = "INSERT INTO Issues (issueNum, issueTitle, pubDate) VALUES (" +
-                          issueNum + ", " + titleVal + ", \"" + pubDate.toString() + "\");";
+                          issueNum + ", " + Util.sqlStrWrapper(issueTitle) + ", \"" + pubDate.toString() + "\");";
         
         // SQL 2: Link the new Issue to the Publication (IssueOf table)
         // We use LAST_INSERT_ID() to get the ID MariaDB just generated for the Issue.
@@ -51,6 +52,14 @@ public class CreateNewIssue extends Operation {
         try {
             // Start the transaction
             stmt.executeUpdate("START TRANSACTION;");
+
+            // Ensure that a publication of type book exists with the given pubID
+            ResultSet rs = stmt.executeQuery(sqlPubValidation);
+            if (!rs.next())
+                throw new FailedOperationException("No publication found with that ID");
+
+            if (rs.getString("type").equals("book"))
+                throw new FailedOperationException("Publication #" + pubID + " is not a periodical.");
 
             // Execute both steps
             stmt.executeUpdate(sqlIssue);
