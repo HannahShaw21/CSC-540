@@ -1,11 +1,14 @@
 package gutenberg.operations.distributors;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 2.8 (General): List all distribution partners and their current status.
@@ -23,34 +26,28 @@ public class ListDistributors extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL targets the 'Distributors' table
-        String sql = "SELECT * FROM Distributors ORDER BY distributorName ASC;";
+        String sql = "SELECT * FROM Distributors ORDER BY name ASC;";
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            
-            System.out.println("\n--- Distributor Directory ---");
-            // Header for the table
-            System.out.printf("%-20s | %-10s | %-15s | %-12s | %-12s | %-10s\n", 
-                              "Name", "Type", "Contact", "Phone", "Billed", "Paid");
-            System.out.println("-------------------------------------------------------------------------------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                // Using corrected column names to match the schema
-                System.out.printf("%-20s | %-10s | %-15s | %-12s | $%-11.2f | $%-9.2f\n", 
-                    rs.getString("distributorName"),
-                    rs.getString("type"),
-                    rs.getString("contactPerson") == null ? "N/A" : rs.getString("contactPerson"),
-                    rs.getString("phoneNum") == null ? "N/A" : rs.getString("phoneNum"),
-                    rs.getFloat("totalBilled"),
-                    rs.getFloat("totalPaid"));
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getString("name"));
+                row.add(rs.getString("type"));
+                row.add(rs.getString("contactName"));
+                row.add(rs.getString("phoneNum"));
+                row.add(rs.getFloat("totalBilled"));
+                row.add(rs.getFloat("totalPaid"));
+
+                data.add(row);
             }
 
-            if (!found) {
-                System.out.println("No distributors found in the system.");
-            }
-            System.out.println("-------------------------------------------------------------------------------------------------\n");
+            Util.printTable("Distributors",
+                    List.of("Name", "Type", "Contact", "Phone #", "Total Billed", "Total Paid"),
+                    data
+            );
 
         } catch (SQLException e) {
             // No import needed for FailedOperationException since it's now in the same package

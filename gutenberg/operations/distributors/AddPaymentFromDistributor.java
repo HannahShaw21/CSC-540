@@ -1,5 +1,6 @@
 package gutenberg.operations.distributors;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
@@ -28,11 +29,10 @@ public class AddPaymentFromDistributor extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        // Using CURDATE() to automatically record the current date in the database.
-        String sql = "INSERT INTO DistributorPayments (distributorName, amount, payDate) VALUES (" +
-                     "\"" + distributor + "\", " + 
-                     payment + ", " + 
-                     "CURDATE());";
+        String sql = String.format("UPDATE Distributor SET totalPaid = totalPaid + %f WHERE name = %s;",
+                payment,
+                Util.sqlStrWrapper(distributor)
+        );
 
         try {
             int rowsAffected = stmt.executeUpdate(sql);

@@ -36,7 +36,7 @@ public class DeleteDistributor extends Operation {
     @Override
     public void run(Statement stmt) {
         // Double-quote standard applied for SQL safety
-        String sql = "DELETE FROM Distributors WHERE distributorName = \"" + name + "\";";
+        String sql = "DELETE FROM Distributors WHERE name = \"" + name + "\";";
 
         try {
             int rowsAffected = stmt.executeUpdate(sql);

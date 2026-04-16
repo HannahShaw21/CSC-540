@@ -1,11 +1,14 @@
 package gutenberg.operations.distributors;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 3.4: List all distributors with a non-zero balance.
@@ -23,38 +26,29 @@ public class ListDistributorsNonzeroBalance extends Operation {
     @Override
     public void run(Statement stmt) {
         // Query targets distributors where the accounts haven't settled to zero
-        String sql = "SELECT distributorName, totalBilled, totalPaid, (totalBilled - totalPaid) AS balance " +
+        String sql = "SELECT name, totalBilled, totalPaid, (totalPaid - totalBilled) AS balance " +
                      "FROM Distributors " +
                      "WHERE totalBilled != totalPaid " +
-                     "ORDER BY balance DESC;";
+                     "ORDER BY balance ASC;";
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            
-            System.out.println("\n--- Distributors with Outstanding Balances ---");
-            System.out.printf("%-25s | %-12s | %-12s | %-12s\n", 
-                              "Distributor Name", "Total Billed", "Total Paid", "Balance Due");
-            System.out.println("-----------------------------------------------------------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                float billed = rs.getFloat("totalBilled");
-                float paid = rs.getFloat("totalPaid");
-                float balance = rs.getFloat("balance");
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getString("name"));
+                row.add(rs.getFloat("totalBilled"));
+                row.add(rs.getFloat("totalPaid"));
+                row.add(rs.getFloat("balance"));
 
-                System.out.printf("%-25s | $%-11.2f | $%-11.2f | $%-11.2f\n", 
-                    rs.getString("distributorName"),
-                    billed,
-                    paid,
-                    balance);
+                data.add(row);
             }
 
-            if (!found) {
-                System.out.println("All distributor accounts are currently settled (Zero Balance).");
-            }
-            System.out.println("-----------------------------------------------------------------------------\n");
-
+            Util.printTable("Distributors with Nonzero Balance",
+                    List.of("Name", "Total Billed", "Total Paid", "Balance"),
+                    data
+            );
         } catch (SQLException e) {
             // No import needed for FailedOperationException if it's in this folder!
             throw new FailedOperationException("Failed to retrieve balance report: " + e.getMessage());

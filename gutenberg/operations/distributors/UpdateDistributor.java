@@ -1,5 +1,6 @@
 package gutenberg.operations.distributors;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
@@ -48,7 +49,7 @@ public class UpdateDistributor extends Operation {
 
         // Logic for each optional field
         if (newName.isPresent()) {
-            sql.append("distributorName = \"").append(newName.get()).append("\"");
+            sql.append("name = \"").append(newName.get()).append("\"");
             notFirst = true;
         }
         if (type.isPresent()) {
@@ -58,12 +59,12 @@ public class UpdateDistributor extends Operation {
         }
         if (contactName.isPresent()) {
             if (notFirst) sql.append(", ");
-            sql.append("contactPerson = \"").append(contactName.get()).append("\"");
+            sql.append("contactName = ").append(Util.sqlStrWrapper(contactName.get()));
             notFirst = true;
         }
         if (phoneNum.isPresent()) {
             if (notFirst) sql.append(", ");
-            sql.append("phoneNum = \"").append(phoneNum.get()).append("\"");
+            sql.append("phoneNum = ").append(Util.sqlStrWrapper(phoneNum.get()));
             notFirst = true;
         }
         if (streetAddr.isPresent()) {
@@ -87,7 +88,7 @@ public class UpdateDistributor extends Operation {
         }
 
         // The WHERE clause must use the ORIGINAL name
-        sql.append(" WHERE distributorName = \"").append(name).append("\";");
+        sql.append(" WHERE name = \"").append(name).append("\";");
 
         try {
             int rowsAffected = stmt.executeUpdate(sql.toString());

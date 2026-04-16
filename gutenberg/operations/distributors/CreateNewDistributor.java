@@ -42,7 +42,7 @@ public class CreateNewDistributor extends Operation {
         String paidVal = totalPaid.isPresent() ? String.valueOf(totalPaid.get()) : "0.0";
 
         // Main SQL construction
-        String sql = "INSERT INTO Distributors (distributorName, type, contactPerson, phoneNum, streetAddr, city, totalBilled, totalPaid) VALUES (" +
+        String sql = "INSERT INTO Distributors (name, type, contactName, phoneNum, streetAddr, city, totalBilled, totalPaid) VALUES (" +
                      "\"" + name + "\", " + 
                      "\"" + type + "\", " + 
                      contactVal + ", " + 

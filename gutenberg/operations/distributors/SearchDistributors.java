@@ -1,11 +1,14 @@
 package gutenberg.operations.distributors;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -44,26 +47,25 @@ public class SearchDistributors extends Operation {
 
         try {
             ResultSet rs = stmt.executeQuery(sql.toString());
-            
-            System.out.println("\n--- Distributor Search Results ---");
-            System.out.printf("%-20s | %-10s | %-15s | %-15s\n", 
-                              "Name", "Type", "City", "Contact");
-            System.out.println("-------------------------------------------------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                System.out.printf("%-20s | %-10s | %-15s | %-15s\n", 
-                    rs.getString("distributorName"),
-                    rs.getString("type"),
-                    rs.getString("city"),
-                    rs.getString("contactPerson") == null ? "N/A" : rs.getString("contactPerson"));
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getString("name"));
+                row.add(rs.getString("type"));
+                row.add(rs.getString("contactName"));
+                row.add(rs.getString("phoneNum"));
+                row.add(rs.getString("city"));
+                row.add(rs.getFloat("totalBilled"));
+                row.add(rs.getFloat("totalPaid"));
+
+                data.add(row);
             }
 
-            if (!found) {
-                System.out.println("No distributors found matching those criteria.");
-            }
-            System.out.println("-------------------------------------------------------------------\n");
+            Util.printTable("Searched Distributors",
+                    List.of("Name", "Type", "Contact", "Phone #", "City", "Total Billed", "Total Paid"),
+                    data
+            );
 
         } catch (SQLException e) {
             throw new FailedOperationException("Search failed: " + e.getMessage());
