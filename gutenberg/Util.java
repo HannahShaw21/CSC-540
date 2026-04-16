@@ -42,7 +42,7 @@ public class Util {
             }
 
             if (type == float.class || type == Float.class) {
-                return Integer.parseInt(str);
+                return Float.parseFloat(str);
             }
 
             if (type == LocalDate.class) {
