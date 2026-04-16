@@ -1,11 +1,14 @@
 package gutenberg.operations.articles;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 2.7: Filter articles based on the topic of their parent publication.
@@ -27,26 +30,28 @@ public class SearchArticlesByTopic extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        String sql = "SELECT a.articleID, a.title, p.title AS pubTitle " +
-                     "FROM Articles a " +
-                     "JOIN Issues i ON a.issueID = i.issueID " +
-                     "JOIN Publications p ON i.pubID = p.pubID " +
-                     "WHERE p.topic = \"" + topic + "\";";
+        String sql = "SELECT * FROM Articles " +
+                        "WHERE topic LIKE \"%" + topic + "%\";";
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("\n--- Articles Matching Topic: " + topic + " ---");
-            System.out.printf("%-10s | %-25s | %-25s\n", "ID", "Article Title", "Publication Name");
-            System.out.println("-------------------------------------------------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                System.out.printf("%-10d | %-25s | %-25s\n", 
-                    rs.getInt("articleID"), rs.getString("title"), rs.getString("pubTitle"));
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getInt("issueID"));
+                row.add(rs.getInt("articleNum"));
+                row.add(rs.getString("title"));
+                row.add(rs.getString("topic"));
+                row.add(rs.getDate("writtenDate"));
+
+                data.add(row);
             }
-            if (!found) System.out.println("No articles found under this topic.");
-            System.out.println("-------------------------------------------------------------------\n");
+
+            Util.printTable("Articles with topic: " + topic,
+                    List.of("Issue ID", "Article #", "Title", "Topic", "Written Date"),
+                    data
+            );
         } catch (SQLException e) {
             throw new FailedOperationException("Topic search failed: " + e.getMessage());
         }

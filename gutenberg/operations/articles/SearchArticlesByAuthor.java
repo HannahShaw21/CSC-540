@@ -1,11 +1,14 @@
 package gutenberg.operations.articles;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task 2.7: Retrieve a list of articles authored by a specific writer.
@@ -16,7 +19,7 @@ import java.sql.Statement;
 public class SearchArticlesByAuthor extends Operation {
 
     /** The ID of the author whose articles are being searched. */
-    public int writerID;
+    public String writerName;
 
     public SearchArticlesByAuthor() {}
 
@@ -27,25 +30,30 @@ public class SearchArticlesByAuthor extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        String sql = "SELECT a.articleID, a.title, a.creationDate " +
-                     "FROM Articles a " +
-                     "JOIN WritesArticle w ON a.articleID = w.articleID " +
-                     "WHERE w.writerID = " + writerID + ";";
+        String sql = "SELECT * FROM (Articles NATURAL JOIN " +
+                "(SELECT writerID, issueID, articleNum FROM Authors) authorWorks " +
+                "NATURAL JOIN (SELECT writerID, name AS authorName FROM Writers WHERE name LIKE " +
+                "\"%" + writerName + "%\") relAuthors);";
 
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("\n--- Search Results for Writer ID: " + writerID + " ---");
-            System.out.printf("%-10s | %-30s | %-12s\n", "ID", "Title", "Date");
-            System.out.println("------------------------------------------------------------");
 
-            boolean found = false;
+            List<List<Object>> data = new ArrayList<>();
             while (rs.next()) {
-                found = true;
-                System.out.printf("%-10d | %-30s | %-12s\n", 
-                    rs.getInt("articleID"), rs.getString("title"), rs.getString("creationDate"));
+                List<Object> row = new ArrayList<>();
+                row.add(rs.getInt("issueID"));
+                row.add(rs.getInt("articleNum"));
+                row.add(rs.getString("title"));
+                row.add(rs.getString("topic"));
+                row.add(rs.getString("authorName"));
+
+                data.add(row);
             }
-            if (!found) System.out.println("No articles found for this author.");
-            System.out.println("------------------------------------------------------------\n");
+
+            Util.printTable("Articles authored by: " + writerName,
+                    List.of("Issue ID", "Article #", "Title", "Topic", "Author"),
+                    data
+            );
         } catch (SQLException e) {
             throw new FailedOperationException("Author search failed: " + e.getMessage());
         }
