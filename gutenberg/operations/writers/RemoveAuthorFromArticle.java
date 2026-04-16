@@ -36,7 +36,7 @@ public class RemoveAuthorFromArticle extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL Construction: Both are integers, so no quotes are required.
-        String sql = "DELETE FROM WritesArticle WHERE writerID = " + writerID + 
+        String sql = "DELETE FROM Authors WHERE writerID = " + writerID +
                      " AND articleID = " + articleID + ";";
 
         try {

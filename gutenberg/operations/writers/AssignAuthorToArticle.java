@@ -35,8 +35,7 @@ public class AssignAuthorToArticle extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL Construction: Both are integers, so no quotes are needed.
-        // Table name 'WritesArticle' matches the schema defined in Project Report #2.
-        String sql = "INSERT INTO WritesArticle (writerID, articleID) VALUES (" 
+        String sql = "INSERT INTO Authors (writerID, articleID) VALUES ("
                      + writerID + ", " + articleID + ");";
 
         try {

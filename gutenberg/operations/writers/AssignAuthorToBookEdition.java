@@ -36,7 +36,7 @@ public class AssignAuthorToBookEdition extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL Construction: Strings (ISBN) get double quotes; IDs (writerID) do not.
-        String sql = "INSERT INTO Authorship (writerID, isbn) VALUES (" 
+        String sql = "INSERT INTO Authors (writerID, isbn) VALUES ("
                      + writerID + ", \"" + isbn + "\");";
 
         try {

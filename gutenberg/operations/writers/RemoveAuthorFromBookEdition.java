@@ -35,7 +35,7 @@ public class RemoveAuthorFromBookEdition extends Operation {
     @Override
     public void run(Statement stmt) {
         // SQL Construction: ISBN is a string, so it needs double quotes.
-        String sql = "DELETE FROM Authorship WHERE writerID = " + writerID + 
+        String sql = "DELETE FROM Authors WHERE writerID = " + writerID +
                      " AND isbn = \"" + isbn + "\";";
 
         try {
