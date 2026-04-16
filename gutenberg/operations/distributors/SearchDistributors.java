@@ -43,7 +43,7 @@ public class SearchDistributors extends Operation {
             sql.append(" AND city = \"").append(city.get()).append("\"");
         }
 
-        sql.append(" ORDER BY distributorName ASC;");
+        sql.append(" ORDER BY name ASC;");
 
         try {
             ResultSet rs = stmt.executeQuery(sql.toString());

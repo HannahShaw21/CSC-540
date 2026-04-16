@@ -35,7 +35,7 @@ public class PlaceBookOrder extends Operation {
     @Override
     public void run(Statement stmt) {
         // Note: Dates and Strings are quoted; numeric types (float/int) are not.
-        String sql = "INSERT INTO Orders (distributorName, isbn, pricePerCopy, numCopies, shippingCost, orderDate, deliveryDate) VALUES (" +
+        String sql = "INSERT INTO Orders (disName, isbn, unitPrice, quantity, shippingCost, orderDate, deliveryDate) VALUES (" +
                      "\"" + distributor + "\", " + 
                      "\"" + isbn + "\", " + 
                      unitPrice + ", " + 

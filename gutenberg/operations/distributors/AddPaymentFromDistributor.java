@@ -29,7 +29,7 @@ public class AddPaymentFromDistributor extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        String sql = String.format("UPDATE Distributor SET totalPaid = totalPaid + %f WHERE name = %s;",
+        String sql = String.format("UPDATE Distributors SET totalPaid = totalPaid + %f WHERE name = %s;",
                 payment,
                 Util.sqlStrWrapper(distributor)
         );

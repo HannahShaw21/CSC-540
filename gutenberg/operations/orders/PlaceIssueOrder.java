@@ -34,7 +34,7 @@ public class PlaceIssueOrder extends Operation {
     @Override
     public void run(Statement stmt) {
         // Constructing the SQL INSERT statement
-        String sql = "INSERT INTO Orders (distributorName, issueID, pricePerCopy, numCopies, shippingCost, orderDate, deliveryDate) VALUES (" +
+        String sql = "INSERT INTO Orders (disName, issueID, unitPrice, quantity, shippingCost, orderDate, deliveryDate) VALUES (" +
                      "\"" + distributor + "\", " + 
                      issueID + ", " + 
                      unitPrice + ", " + 
