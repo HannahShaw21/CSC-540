@@ -1,5 +1,6 @@
 package gutenberg.operations.articles;
 
+import gutenberg.Util;
 import gutenberg.operations.FailedOperationException;
 import gutenberg.operations.Operation;
 
@@ -41,7 +42,7 @@ public class UpdateArticle extends Operation {
         boolean notFirst = false;
 
         if (title.isPresent()) {
-            sql.append("title = \"").append(title.get()).append("\"");
+            sql.append("title = ").append(Util.sqlStrWrapper(title));
             notFirst = true;
         }
         if (content.isPresent()) {
@@ -51,7 +52,7 @@ public class UpdateArticle extends Operation {
         }
         if (writtenDate.isPresent()) {
             if (notFirst) sql.append(", ");
-            sql.append("creationDate = \"").append(writtenDate.get()).append("\"");
+            sql.append("writtenDate = \"").append(writtenDate.get()).append("\"");
         }
 
         sql.append(" WHERE articleID = ").append(articleID).append(";");

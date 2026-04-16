@@ -41,7 +41,7 @@ public class CreateNewArticle extends Operation {
      */
     @Override
     public void run(Statement stmt) {
-        String sql = "INSERT INTO Articles (issueID, articleNum, title, creationDate, content) VALUES (" +
+        String sql = "INSERT INTO Articles (issueID, articleNum, title, writtenDate, content) VALUES (" +
                      issueID + ", " + 
                      articleNum + ", " + 
                      "\"" + title + "\", " + 
@@ -50,14 +50,13 @@ public class CreateNewArticle extends Operation {
 
         try {
             stmt.executeUpdate(sql);
-            ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID();");
 
-            if (rs.next()) {
-                System.out.println("\n--- Article Creation Success ---");
-                System.out.println("New Article ID : " + rs.getInt(1));
-                System.out.println("Title          : " + title);
-                System.out.println("Issue ID       : " + issueID + "\n");
-            }
+            System.out.println("\n--- Article Creation Success ---");
+            System.out.println("Issue ID       : " + issueID);
+            System.out.println("Article #      : " + articleNum);
+            System.out.println("Title          : " + title);
+            System.out.println();
+
         } catch (SQLException e) {
             throw new FailedOperationException("Failed to create article: " + e.getMessage());
         }

@@ -77,6 +77,8 @@ public class GutenbergMain {
         String input = in.nextLine();
 
         // basic commands
+        if (input.isBlank())
+            return false;
         if (input.equalsIgnoreCase("quit"))
             return true;
         if (input.equalsIgnoreCase("list")) {
